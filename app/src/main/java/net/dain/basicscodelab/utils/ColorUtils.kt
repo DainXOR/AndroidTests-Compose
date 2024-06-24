@@ -1,22 +1,22 @@
 package net.dain.basicscodelab.utils
 
 import android.util.Log
-import androidx.annotation.FloatRange
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.ColorUtils
-import java.io.Console
-import kotlin.math.log
-import kotlin.math.max
 import kotlin.math.min
 
 
+fun Color.solid(): Color {
+    return Color(ColorUtils.setAlphaComponent(this.toArgb(), 255))
+}
+
 fun Color.contrastWith(other: Color): Double {
-    val solidBG = ColorUtils.setAlphaComponent(other.toArgb(), 255)
-    return ColorUtils.calculateContrast(this.toArgb(), solidBG)
+    val solidBG = other.solid()
+    return ColorUtils.calculateContrast(this.toArgb(), solidBG.toArgb())
 }
 fun Color.mixWith(other: Color, ratio: Float): Color {
     return Color(ColorUtils.blendARGB(
@@ -40,6 +40,8 @@ fun Color.darken(ratio: Float = 0.004f): Color {
 fun Color.lighten(ratio: Float = -0.004f): Color {
     return this.add(Color.White, ratio)
 }
+
+
 
 fun Color.contrast(
     bgColor: Color = Color.Unspecified,

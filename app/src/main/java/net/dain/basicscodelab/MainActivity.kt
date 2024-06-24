@@ -15,15 +15,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import net.dain.basicscodelab.tests.SimpleMenu
+import net.dain.basicscodelab.miniapps.GameActivity
+import net.dain.basicscodelab.tests.LayoutsTests
+import net.dain.basicscodelab.utils.SimpleMenu
 import net.dain.basicscodelab.ui.theme.BasicsCodelabTheme
+import net.dain.basicscodelab.utils.Named
 
-enum class MiniApp(val displayName: String) {
+enum class MiniApp(override val displayName: String) : Named {
     MAIN_MENU("Main Menu"),
     LAYOUT_TESTING("Layouts Tests"),
 
-    MUSIC_APP("Music"),
     GAME_APP("Game"),
+    MUSIC_APP("Music"),
     CHAT_APP("Chat"),
     LOCK_SCREEN("Lock Screen"),
 
@@ -50,31 +53,37 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainApp(modifier: Modifier = Modifier) {
     var currentWindow by remember { mutableStateOf(MiniApp.MAIN_MENU) }
-    val appsCount = MiniApp.entries.lastIndex + 1
+    val changeWindow: (MiniApp) -> Unit = { menu: MiniApp -> currentWindow = menu }
+    val appsCount = MiniApp.entries.lastIndex - 3
     val pages = MiniApp.entries.subList(1, appsCount)
 
     Scaffold(modifier = modifier.fillMaxSize()) { innerPadding ->
         when (currentWindow){
             MiniApp.MAIN_MENU -> SimpleMenu(
                 modifier = modifier.padding(innerPadding),
-                onClick = { menu: MiniApp -> currentWindow = menu },
+                onClick = changeWindow,
                 options = pages,
-                beginColor = Color(255, 120, 0),
-                endColor = Color(255, 255, 0)
+                beginButtonsColor = Color(255, 120, 0),
+                endButtonsColor = Color(255, 255, 0)
             ).Draw()
 
-            MiniApp.LAYOUT_TESTING -> TODO()
+            MiniApp.LAYOUT_TESTING -> LayoutsTests(
+                modifier = modifier.padding(innerPadding),
+                name = "Dain",
+                onClick = changeWindow
+            ).Draw()
+
+            MiniApp.GAME_APP -> GameActivity().Draw()
             MiniApp.MUSIC_APP -> TODO()
-            MiniApp.GAME_APP -> TODO()
             MiniApp.CHAT_APP -> TODO()
             MiniApp.LOCK_SCREEN -> TODO()
 
 
 
-            MiniApp.TEST_1 -> TODO()
-            MiniApp.TEST_2 -> TODO()
-            MiniApp.TEST_3 -> TODO()
-            MiniApp.TEST_4 -> TODO()
+            MiniApp.TEST_1 -> {}
+            MiniApp.TEST_2 -> {}
+            MiniApp.TEST_3 -> {}
+            MiniApp.TEST_4 -> {}
         }
     }
 }

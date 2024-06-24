@@ -1,4 +1,4 @@
-package net.dain.basicscodelab.tests
+package net.dain.basicscodelab.utils
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -58,6 +58,7 @@ class SimpleButton(
                 modifier = modifier.padding(horizontal = 16.dp, vertical = 16.dp),
                 text = text,
                 color = textColor,
+                fontSize = textSize
             )
         }
     }

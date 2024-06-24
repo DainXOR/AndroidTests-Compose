@@ -1,21 +1,17 @@
-package net.dain.basicscodelab.tests
+package net.dain.basicscodelab.utils
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ElevatedButton
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.dain.basicscodelab.MiniApp
-import net.dain.basicscodelab.utils.Gradient
-import net.dain.basicscodelab.utils.contrast
 import java.util.EnumMap
 
 @Preview(showBackground = true)
@@ -34,14 +30,21 @@ class SimpleMenu(
     private val modifier: Modifier = Modifier,
     private val options: List<MiniApp> = listOf(),
     private val bgColor: Color = Color(25, 25, 25, 255),
-    private val gradient: Gradient = Gradient(
-        start = Color(0, 255, 0),
-        end = Color(0, 255, 255),
+    private val buttonGradient: Gradient = Gradient(
+        start = Color(0, 255, 0, 255),
+        end = Color(0, 255, 255, 255),
+        forceAlpha = 0f,
+        steps = options.size.toUInt()
+    ),
+    private val textGradient: Gradient = Gradient(
+        start = Color.Black,
+        end = Color.Black,
         forceAlpha = 0f,
         steps = options.size.toUInt()
     ),
     private val onClick: (MiniApp) -> Unit = {},
-    private val blackAndWhiteText: Boolean = true
+    private val blackAndWhiteText: Boolean = true,
+    private val adjustTextColor: Boolean = false
 ) : Collection<SimpleButton>
 {
     private var buttons: EnumMap<MiniApp, SimpleButton> = EnumMap(MiniApp::class.java)
@@ -50,25 +53,34 @@ class SimpleMenu(
         modifier: Modifier = Modifier,
         options: List<MiniApp> = listOf(),
         bgColor: Color = Color(25, 25, 25, 255),
-        beginColor: Color = Color(0, 255, 0),
-        endColor: Color = Color(0, 255, 255),
-        alphaValue: Float = 0f,
+        beginButtonsColor: Color = Color(0, 255, 0, 255),
+        endButtonsColor: Color = Color(0, 255, 255, 255),
+        beginTextsColor: Color = Color(0, 0, 0, 255),
+        endTextsColor: Color = Color(0, 0, 0, 255),
+        buttonAlpha: Float = 0f,
+        textAlpha: Float = 0f,
         onClick: (MiniApp) -> Unit = {},
-        blackAndWhiteText: Boolean = true
+        blackAndWhiteText: Boolean = true,
+        adjustTextColor: Boolean = false
     ) : this(
         modifier,
         options,
         bgColor,
         Gradient(
-            start = beginColor, end = endColor,
-            forceAlpha = alphaValue, steps = options.size.toUInt()
+            start = beginButtonsColor, end = endButtonsColor,
+            forceAlpha = buttonAlpha, steps = options.size.toUInt()
+        ),
+        Gradient(
+            start = beginTextsColor, end = endTextsColor,
+            forceAlpha = textAlpha, steps = options.size.toUInt()
         ),
         onClick,
-        blackAndWhiteText
+        blackAndWhiteText,
+        adjustTextColor
     )
 
     override fun isEmpty(): Boolean {
-        return options.isEmpty()
+        return buttons.isEmpty()
     }
     override fun iterator(): Iterator<SimpleButton> {
         return buttons.values.iterator()
@@ -83,9 +95,17 @@ class SimpleMenu(
     private operator fun get(index: Int): SimpleButton {
         return buttons.values.elementAt(index)
     }
+    operator fun get(app: MiniApp): SimpleButton {
+        return buttons[app]!!
+    }
 
     override val size: Int
         get() = buttons.size
+
+    fun getButtons(): List<SimpleButton> {
+        return buttons.values.toList()
+    }
+
 
 
     @Composable
@@ -94,31 +114,34 @@ class SimpleMenu(
             color = bgColor,
             modifier = modifier.fillMaxSize()
         ) {
-            Column(
+            val test = options.zip(buttonGradient, textGradient)
+
+            LazyColumn(
                 modifier = modifier
                     .padding(horizontal = 16.dp, vertical = 4.dp),
-                ) {
-                val gradientText = gradient.copy()
+                ) { items(items = options.zip(buttonGradient, textGradient) ) { (option, bColor, tColor) ->
 
-                for (i in options.indices) {
+                    val textColor = if (adjustTextColor) {
+                        tColor.contrast(
+                            bgColor = bColor.solid(),
+                            blackOrWhite = blackAndWhiteText
+                        )
+                    } else {
+                        tColor
+                    }
+
                     val newButton = SimpleButton(
                         modifier = Modifier.padding(vertical = 8.dp),
                         onClick = { app: MiniApp -> onClick(app) },
-                        app = options[i],
-                        text = options[i].displayName,
-                        bgColor = gradient[i],
-                        textColor = gradientText[i].contrast(
-                            bgColor = gradient[i],
-                            minContrast = 0.8f,
-                            blackOrWhite = blackAndWhiteText
-                        )
+                        app = option,
+                        text = option.displayName,
+                        bgColor = bColor,
+                        textColor = textColor.solid()
                     )
 
                     newButton.Draw()
-                    buttons[options[i]] = newButton
+                    buttons[option] = newButton
                 }
-
-
             }
         }
     }
